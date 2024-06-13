@@ -1,0 +1,3420 @@
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JPasswordField;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.util.Random;
+import java.awt.event.ActionEvent;
+import javax.swing.JCheckBox;
+import java.awt.Color;
+import javax.swing.SwingConstants;
+
+public class login extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    static JTextField user;
+    private JPasswordField pass;
+    private JTextField textField;
+	private String captcha;
+	private JLabel lblNewLabel_3;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    login frame = new login();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public login() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 573, 564);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+        
+        JLabel lblNewLabel_2_1 = new JLabel("Captcha");
+        lblNewLabel_2_1.setHorizontalAlignment(SwingConstants.LEFT);
+        lblNewLabel_2_1.setFont(new Font("Tahoma", Font.BOLD, 14));
+        lblNewLabel_2_1.setBounds(62, 311, 89, 36);
+        contentPane.add(lblNewLabel_2_1);
+        
+        JLabel lblNewLabel_2 = new JLabel("Enter Captcha");
+        lblNewLabel_2.setFont(new Font("Tahoma", Font.BOLD, 14));
+        lblNewLabel_2.setHorizontalAlignment(SwingConstants.LEFT);
+        lblNewLabel_2.setBounds(33, 250, 117, 36);
+        contentPane.add(lblNewLabel_2);
+
+        JLabel lblNewLabel = new JLabel("Welcome Pharmacist");
+        lblNewLabel.setBounds(79, 40, 397, 83);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+        contentPane.add(lblNewLabel);
+
+        JLabel lblNewLabel_1 = new JLabel("UserName");
+        lblNewLabel_1.setBounds(33, 133, 117, 38);
+        lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1);
+
+        JLabel lblNewLabel_1_1 = new JLabel("Password");
+        lblNewLabel_1_1.setBounds(33, 202, 117, 38);
+        lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_1);
+
+        user = new JTextField();
+        user.setBounds(175, 133, 226, 42);
+        contentPane.add(user);
+        user.setColumns(10);
+
+        pass = new JPasswordField();
+        pass.setBounds(175, 202, 226, 38);
+        contentPane.add(pass);
+
+        JButton btnNewButton = new JButton("Login");
+        btnNewButton.setBounds(33, 375, 117, 38);
+        btnNewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    String us = user.getText();
+                    String ps = new String(pass.getPassword());
+                    if("".equals(us) || "".equals(ps) ) {
+                        JOptionPane.showMessageDialog(btnNewButton, "Enter Username or Password", "Login Failure", JOptionPane.ERROR_MESSAGE);
+                    } else {
+                        Class.forName("com.mysql.cj.jdbc.Driver");
+                        Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/login","root","raj@2004");
+                        Statement st = con.createStatement();
+                        String sql = "SELECT username, password FROM access";
+                        ResultSet rs = st.executeQuery(sql);
+                        boolean loginSuccess = false;
+                        while(rs.next()){
+                            String username = rs.getString("username");
+                            String password = rs.getString("password");
+                            if(us.equals(username) && ps.equals(password) && captcha.equals(textField.getText())){
+                                new Dashboard().setVisible(true);
+                                SwingUtilities.windowForComponent(btnNewButton).dispose();
+                                loginSuccess = true;
+                                break;
+                            }
+                        }
+                        rs.close();
+                        st.close();
+                        con.close();
+                        if(!loginSuccess) {
+                            user.setText("Invalid");
+                            pass.setText("Invalid");
+                            JOptionPane.showMessageDialog(btnNewButton, "Login Failed", "Login", JOptionPane.ERROR_MESSAGE);
+                        } else {
+                            JOptionPane.showMessageDialog(btnNewButton, "Login Success", "Login", JOptionPane.INFORMATION_MESSAGE);
+                        }
+                    }
+                } catch(Exception o) {
+                    JOptionPane.showMessageDialog(btnNewButton, "Error while establishing connection", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    o.printStackTrace();
+                }
+            }
+        });
+        btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton);
+
+        JButton btnNewButton_1 = new JButton("ForgetPass");
+        btnNewButton_1.setBounds(184, 375, 184, 38);
+        btnNewButton_1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    new verify().setVisible(true);
+                    SwingUtilities.windowForComponent(btnNewButton).dispose();
+                } catch(Exception o) {
+                    JOptionPane.showMessageDialog(btnNewButton, "Error while establishing connection", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    o.printStackTrace();
+                }
+            }
+        });
+        btnNewButton_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton_1);
+
+        JButton CreateAccount = new JButton("Create new account");
+        CreateAccount.setBounds(333, 434, 216, 38);
+        CreateAccount.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    new signup().setVisible(true);
+                    SwingUtilities.windowForComponent(btnNewButton).dispose();
+                } catch(Exception o) {
+                    JOptionPane.showMessageDialog(btnNewButton, "Error while establishing connection", "Connection Error", JOptionPane.ERROR_MESSAGE);
+                    o.printStackTrace();
+                }
+            }
+        });
+        CreateAccount.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(CreateAccount);
+
+        JCheckBox txtpa = new JCheckBox("Show password");
+        txtpa.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (txtpa.isSelected()) {
+                    pass.setEchoChar((char) 0);
+                } else {
+                    pass.setEchoChar('•');
+                }
+            }
+        });
+        txtpa.setFont(new Font("Tahoma", Font.BOLD, 13));
+        txtpa.setBounds(413, 205, 136, 38);
+        contentPane.add(txtpa);
+        
+        textField = new JTextField();
+        textField.setColumns(10);
+        textField.setBounds(175, 250, 226, 42);
+        contentPane.add(textField);
+        
+       lblNewLabel_3 = new JLabel("");
+        lblNewLabel_3.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        captcha = generateCaptcha();
+        lblNewLabel_3.setText(captcha);
+        lblNewLabel_3.setBounds(175, 311, 226, 36);
+        contentPane.add(lblNewLabel_3);
+        
+        JButton btnNewButton_2 = new JButton("Refresh");
+        btnNewButton_2.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		captcha = generateCaptcha();
+        		lblNewLabel_3.setText(captcha);
+        	}
+        });
+        btnNewButton_2.setFont(new Font("Tahoma", Font.PLAIN, 15));
+        btnNewButton_2.setBounds(410, 310, 110, 37);
+        contentPane.add(btnNewButton_2);
+    }
+
+	private static String generateCaptcha() {
+		 Random rand = new Random();
+	        int length = 7 + (Math.abs(rand.nextInt()) % 3);
+	        StringBuilder captcha = new StringBuilder();
+	        for (int i = 0; i < length; i++) {
+	            int base = Math.abs(rand.nextInt()) % 62;
+	            char charN;
+	            if (base < 26) {
+	                charN = (char) (65 + base);
+	            } else if (base < 52) {
+	                charN = (char) (97 + (base - 26));
+	            } else {
+	                charN = (char) (48 + (base - 52));
+	            }
+	            captcha.append(charN);
+	        }
+	        return captcha.toString();
+
+		// TODO Auto-generated method stub
+		//return null;
+	}
+}
+import java.awt.EventQueue;
+import javax.mail.Message;
+import javax.mail.MessagingException;
+import javax.mail.Multipart;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.mail.PasswordAuthentication;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeBodyPart;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMultipart;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.util.Properties;
+import java.util.Random;
+import java.awt.event.ActionEvent;
+import java.awt.Font;
+import javax.swing.JLabel;
+import java.awt.Color;
+
+public class verify extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JTextField emailid;
+	private JTextField textField_1;
+	private String n3;
+	private JLabel lblNewLabel;
+	private JLabel lblOtp;
+	private JButton back;
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					verify frame = new verify();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public verify() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 714, 415);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		emailid = new JTextField();
+		emailid.setBounds(153, 83, 289, 34);
+		contentPane.add(emailid);
+		emailid.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Send otp");
+		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 15));
+		btnNewButton.addActionListener(new ActionListener() {
+			
+
+			public void actionPerformed(ActionEvent e) {
+				String fr = emailid.getText();
+				 String to = fr; // to address. It can be any like gmail, hotmail etc.
+				  final String from = "rajkapoorjaiswal110@gmail.com"; // from address. As this is using Gmail SMTP.
+				  final String password = "ypyu rqad rdld hvpe"; // password for from mail address. 
+				  Properties prop = new Properties();
+
+				  prop.put("mail.smtp.host", "smtp.gmail.com");
+				  prop.put("mail.smtp.port", "465");
+				  prop.put("mail.smtp.auth", "true");
+				
+				  prop.put("mail.smtp.ssl.protocols", "TLSv1.2");
+				  prop.put("mail.smtp.socketFactory.class", "javax.net.ssl.SSLSocketFactory");
+			      
+			      
+			      Session session = Session.getDefaultInstance(prop,  
+			       new javax.mail.Authenticator() {  
+			       protected PasswordAuthentication getPasswordAuthentication() {  
+			       return new PasswordAuthentication(from,password);  
+			       }  
+			      });  
+			         
+			      //2) compose message     
+			      try {
+						 
+					   Message message = new MimeMessage(session);
+					   message.setFrom(new InternetAddress(from));
+					   message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
+					   message.setSubject("Verification Mail");
+					   int n;
+					   Random ran = new Random();
+					   n = ran.nextInt();
+					   n=Math.abs(n);
+					   System.out.println(n);
+					   n3 = String.valueOf(n);
+					   String msg = "OTP :"+n3 ;
+					    
+					   MimeBodyPart mimeBodyPart = new MimeBodyPart();
+					   mimeBodyPart.setContent(msg, "text/html");
+					     
+					   Multipart multipart = new MimeMultipart();
+					   multipart.addBodyPart(mimeBodyPart);
+					    
+					 
+					   message.setContent(multipart);
+					 
+					   Transport.send(message);
+					 
+					   System.out.println("Mail successfully sent..");
+					   
+					  } catch (MessagingException er) {
+					   er.printStackTrace();
+				}
+			}
+		});
+		btnNewButton.setBounds(463, 70, 125, 35);
+		contentPane.add(btnNewButton);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(164, 147, 253, 35);
+		contentPane.add(textField_1);
+		textField_1.setColumns(10);
+		
+		JButton btnNewButton_1 = new JButton("verify");
+		btnNewButton_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				if(textField_1.getText().equals(n3)) {
+					System.out.println("hello");
+					 new Forgetpass().setVisible(true);
+	                    SwingUtilities.windowForComponent(btnNewButton).dispose();
+				}
+			}
+		});
+		btnNewButton_1.setBounds(284, 192, 111, 34);
+		contentPane.add(btnNewButton_1);
+		
+		lblNewLabel = new JLabel("Email");
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 15));
+		lblNewLabel.setBounds(60, 86, 67, 23);
+		contentPane.add(lblNewLabel);
+		
+		lblOtp = new JLabel("OTP");
+		lblOtp.setFont(new Font("Tahoma", Font.BOLD, 15));
+		lblOtp.setBounds(74, 158, 67, 23);
+		contentPane.add(lblOtp);
+		
+		back = new JButton("Back");
+		back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+                    login newframe = new login();
+                    newframe.setVisible(true);
+                    SwingUtilities.windowForComponent(back).dispose();
+  
+		}
+		});
+		back.setFont(new Font("Tahoma", Font.BOLD, 15));
+		back.setBounds(74, 279, 111, 34);
+		contentPane.add(back);
+	}
+
+}
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
+import java.awt.Font;
+import javax.swing.JPasswordField;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import javax.swing.ImageIcon;
+import javax.swing.JRadioButton;
+import javax.swing.JCheckBox;
+
+public class Forgetpass extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JPasswordField passwordField;
+	private JPasswordField passwordField_1;
+	private JTextField textField;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					Forgetpass frame = new Forgetpass();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public Forgetpass() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 702, 545);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("Pharmacy Management");
+		lblNewLabel.setBounds(186, 10, 317, 79);
+		lblNewLabel.setBackground(new Color(0, 255, 0));
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(lblNewLabel);
+		
+		JLabel lblUsername = new JLabel("UserName:");
+		lblUsername.setBounds(24, 159, 173, 51);
+		lblUsername.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(lblUsername);
+		
+		JLabel lblNewpassword = new JLabel("Newpassword:");
+		lblNewpassword.setBounds(24, 236, 204, 79);
+		lblNewpassword.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(lblNewpassword);
+		
+		JLabel lblConformpassword = new JLabel("Confirmpassword:");
+		lblConformpassword.setBounds(24, 325, 247, 79);
+		lblConformpassword.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(lblConformpassword);
+		
+		passwordField = new JPasswordField();
+		passwordField.setBounds(295, 339, 255, 39);
+		contentPane.add(passwordField);
+		
+		passwordField_1 = new JPasswordField();
+		passwordField_1.setBounds(273, 250, 261, 39);
+		contentPane.add(passwordField_1);
+		
+		textField = new JTextField();
+		textField.setBounds(262, 171, 288, 39);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		JButton btnNewButton = new JButton("Confirm");
+		btnNewButton.setBounds(50, 445, 124, 33);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+				int i=1;
+				int j=0;
+				String us1 = textField.getText();
+				String np = passwordField.getText();	
+				String cp =passwordField_1.getText();
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				Connection con1 = (Connection)DriverManager.getConnection("jdbc:mysql://localhost:3307/login","root","raj@2004");
+				Statement st1 = con1.createStatement();
+				String sql1 =  "Select * from access";
+				ResultSet res1 = st1.executeQuery(sql1);
+				while(res1.next()) {
+					String use1 = res1.getString("username");
+					System.out.print("1");
+					if(us1.equals(use1) && np.equals(cp)) {
+						String sql2 = "update access set password = '"+np+"' where username = '"+us1+"'";
+						PreparedStatement pts = con1.prepareStatement(sql2);
+						System.out.print(np);
+						j++;
+					    /*pts.setValueAt(np,sql2,0);
+					    System.out.print(i);
+						pts.setInt(1,i);
+						System.out.println(sql2);*/
+						System.out.println("2");
+						pts.executeUpdate(sql2);
+						System.out.print("success");
+						
+						
+					}
+					else {
+					     textField.setText("");
+					     passwordField.setText("");
+					     passwordField_1.setText("");
+					}
+					i++;
+				}
+				if(j==1 || j>1) {
+					login newframe = new login();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(btnNewButton).dispose();
+					JOptionPane.showMessageDialog(btnNewButton, " data updated", "updated", -1);
+				}
+				}
+				catch(Exception os)
+				{
+					System.out.print(os);
+					JOptionPane.showMessageDialog(btnNewButton, this, "Error while establishing connection failed", 0);
+				}
+			}
+		});
+		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnNewButton);
+		
+		JButton Back = new JButton("Back");
+		Back.setBounds(315, 445, 124, 33);
+		Back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					login newframe = new login();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Back).dispose();
+			}
+			});
+		Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(Back);
+		
+		JCheckBox txt = new JCheckBox("new password");
+        txt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (txt.isSelected()) {
+                    passwordField_1.setEchoChar((char) 0);
+                } else {
+                    passwordField_1.setEchoChar('•');
+                }
+            }
+        });
+		txt.setFont(new Font("Tahoma", Font.BOLD, 10));
+		txt.setBounds(551, 259, 117, 21);
+		contentPane.add(txt);
+		
+		JCheckBox textt = new JCheckBox("password");
+		textt.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (textt.isSelected()) {
+                    passwordField.setEchoChar((char) 0);
+                } else {
+                    passwordField.setEchoChar('•');
+                }
+            }
+        });
+		textt.setFont(new Font("Tahoma", Font.BOLD, 10));
+		textt.setBounds(563, 348, 93, 21);
+		contentPane.add(textt);
+	}
+}
+import java.awt.Component;
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JPasswordField;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+import javax.swing.JCheckBox;
+
+public class signup extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField user;
+    private JPasswordField pass;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    signup frame = new signup();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public signup() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 679, 591);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel lblNewLabel_1_2 = new JLabel("Password:");
+        lblNewLabel_1_2.setBounds(59, 345, 110, 31);
+        lblNewLabel_1_2.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_2);
+
+        JLabel lblNewLabel_1_5 = new JLabel("Username:");
+        lblNewLabel_1_5.setBounds(59, 253, 110, 31);
+        lblNewLabel_1_5.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_5);
+
+        user = new JTextField();
+        user.setBounds(187, 254, 301, 37);
+        user.setColumns(10);
+        contentPane.add(user);
+
+        JButton Back = new JButton("Back");
+        Back.setBounds(81, 468, 115, 31);
+        Back.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                login newframe = new login();
+                newframe.setVisible(true);
+                SwingUtilities.windowForComponent(Back).dispose();
+            }
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Back);
+
+        JButton Signup = new JButton("Signup");
+        Signup.setBounds(404, 468, 115, 31);
+        Signup.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+            	String username = user.getText();
+                String password = new String(pass.getPassword());
+
+                try {
+        			int c=0;
+        			String nu = user.getText();
+        			String np = pass.getText();	
+        			
+        			Class.forName("com.mysql.cj.jdbc.Driver");
+        			Connection con1 = (Connection)DriverManager.getConnection("jdbc:mysql://localhost:3307/login","root","raj@2004");
+        			Statement st1 = con1.createStatement();
+        			
+        			String sql1 =  "Select * from access";
+        			ResultSet res1 = st1.executeQuery(sql1);
+        			System.out.println("1");
+        			
+        			System.out.println("2");
+        			String sql2 = "SELECT COUNT(*) AS count FROM access";
+        			System.out.println("3");
+        			PreparedStatement ps2 = con1.prepareStatement(sql2);
+        			System.out.println("4");
+        			ResultSet res2 = ps2.executeQuery();
+        			System.out.println("5");
+        			while(res2.next())
+        			{ c = res2.getInt(1);
+        			 System.out.print(c);}
+        			c+=1;
+        			
+        					String sql3 = "insert into access values("+c+",'"+nu+"','"+np+"')";
+        					PreparedStatement pts = con1.prepareStatement(sql3);
+        					System.out.print(np);
+        				    
+        					System.out.println("2");
+        					pts.executeUpdate(sql3);
+        					System.out.print("success");
+        					JOptionPane.showMessageDialog(null, " data created", "created", -1);
+        					
+        						login newframe = new login();
+        						newframe.setVisible(true);
+        						SwingUtilities.windowForComponent(Signup).dispose();
+        		
+        			}catch(Exception os)
+        			{
+        				System.out.print(os);
+        				JOptionPane.showMessageDialog(Signup, this, "Error while establishing connection failed", 0);
+        			}
+                           
+            }});
+        Signup.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Signup);
+        
+        pass = new JPasswordField();
+        pass.setBounds(187, 349, 301, 31);
+        contentPane.add(pass);
+        
+        JLabel lblNewLabel = new JLabel("Create New Account ");
+        lblNewLabel.setBounds(187, 129, 237, 37);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel);
+        
+        JLabel lblPharmacyManagementSysytem = new JLabel("Pharmacy Management sysytem");
+        lblPharmacyManagementSysytem.setBounds(95, 41, 465, 37);
+        lblPharmacyManagementSysytem.setBackground(new Color(240, 240, 240));
+        lblPharmacyManagementSysytem.setFont(new Font("Tahoma", Font.BOLD, 25));
+        contentPane.add(lblPharmacyManagementSysytem);
+        
+        JCheckBox txtpa = new JCheckBox("show password");
+        txtpa.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                if (txtpa.isSelected()) {
+                    pass.setEchoChar((char) 0);
+                } else {
+                    pass.setEchoChar('•');
+                }
+            }
+        });
+        txtpa.setFont(new Font("Tahoma", Font.BOLD, 10));
+        txtpa.setBounds(507, 354, 125, 22);
+        contentPane.add(txtpa);
+    }	
+}
+
+    
+import javax.swing.*;
+import javax.swing.border.EmptyBorder;
+
+import java.awt.*;
+import java.awt.event.*;
+
+public class Dashboard extends JFrame {
+
+    private JPanel contentPane;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    Dashboard frame = new Dashboard();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public Dashboard() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 587, 515);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel lblNewLabel = new JLabel("User Dashboard");
+        lblNewLabel.setBounds(115, 30, 326, 43);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+        contentPane.add(lblNewLabel);
+
+        JButton btnAddUser = new JButton("Add User");
+        btnAddUser.setBounds(77, 193, 168, 43);
+        btnAddUser.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnAddUser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                ADDUSER frame = new ADDUSER();
+                frame.setVisible(true);
+                dispose();
+            }
+        });
+        contentPane.add(btnAddUser);
+
+        JButton btnViewUser = new JButton("View User");
+        btnViewUser.setBounds(77, 276, 168, 43);
+        btnViewUser.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnViewUser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                VIEWUSER frame = new VIEWUSER();
+                frame.setVisible(true);
+                dispose();
+            }
+        });
+        contentPane.add(btnViewUser);
+
+        JButton btnUpdateUser = new JButton("Update User");
+        btnUpdateUser.setBounds(77, 373, 168, 43);
+        btnUpdateUser.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnUpdateUser.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                updateuser frame = new updateuser();
+                frame.setVisible(true);
+                dispose();
+            }
+        });
+        contentPane.add(btnUpdateUser);
+
+        JButton btnLogout = new JButton("Logout");
+        btnLogout.setBounds(772, 10, 101, 33);
+        btnLogout.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnLogout.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Dashboard newframe = new Dashboard();
+                newframe.setVisible(true);
+                dispose();
+            }
+        });
+        contentPane.add(btnLogout);
+        
+        JButton Login = new JButton("Login");
+        Login.setBounds(349, 281, 111, 33);
+        Login.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+					AdminDashboard newframe = new AdminDashboard();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Login).dispose();
+        	}
+        });
+        Login.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Login);
+        
+        JButton Back = new JButton("Back");
+        Back.setBounds(349, 378, 111, 33);
+        Back.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+					login newframe = new login();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Back).dispose();
+        	}
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Back);
+    }
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.JComboBox;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.awt.event.ActionEvent;
+import java.awt.Color;
+
+public class ADDUSER extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField name;
+    private JTextField no;
+    private JTextField address;
+    private JTextField id;
+    private JComboBox<Integer> dayComboBox;
+    private JComboBox<String> monthComboBox;
+    private JComboBox<Integer> yearComboBox;
+    private JTextField textField;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    ADDUSER frame = new ADDUSER();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public ADDUSER() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 632, 667);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+        
+        JLabel lblNewLabel = new JLabel("Add User");
+        lblNewLabel.setBounds(204, 27, 159, 31);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+        contentPane.add(lblNewLabel);
+        
+        JLabel dob3 = new JLabel("DOB(Date of Birth)");
+        dob3.setBounds(10, 307, 159, 34);
+        dob3.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(dob3);
+
+        // Day Combo Box
+        Integer[] days = new Integer[31];
+        for (int i = 1; i <= 31; i++) {
+            days[i - 1] = i;
+        }
+        dayComboBox = new JComboBox<>(days);
+        dayComboBox.setBounds(10, 340, 60, 43);
+        contentPane.add(dayComboBox);
+
+        // Month Combo Box
+        String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        monthComboBox = new JComboBox<>(months);
+        monthComboBox.setBounds(80, 340, 100, 43);
+        contentPane.add(monthComboBox);
+
+        // Year Combo Box
+        Integer[] years = new Integer[100];
+        for (int i = 1950; i <= 2025; i++) {
+            years[i - 1950] = i;
+        }
+        yearComboBox = new JComboBox<>(years);
+        yearComboBox.setBounds(190, 340, 80, 43);
+        contentPane.add(yearComboBox);
+
+        // Other components...
+
+        JButton btnNewButton = new JButton("Save");
+        btnNewButton.setBounds(327, 574, 103, 31);
+        btnNewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+                    
+                    // Concatenate selected day, month, and year to form the date of birth
+                    String dobValue = dayComboBox.getSelectedItem() + " " + monthComboBox.getSelectedItem() + " " + yearComboBox.getSelectedItem();
+                    
+                    String sql = "INSERT INTO add_user VALUES (?, ?, ?, ?, ?,?)";
+                    PreparedStatement pts = con.prepareStatement(sql);
+                    pts.setString(1, id.getText());
+                    pts.setString(2, name.getText());
+                    pts.setString(3, dobValue);
+                    pts.setString(4, no.getText());
+                    pts.setString(5, textField.getText());
+                    pts.setString(6, address.getText());
+                    pts.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "user id has been registered");
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error: user id has not been registered");
+                    ex.printStackTrace();
+                }
+            }
+        });
+        btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton);
+
+        JButton Back = new JButton("Back");
+        Back.setBounds(71, 574, 103, 31);
+        Back.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                    Dashboard newframe = new Dashboard();
+                    newframe.setVisible(true);
+                    SwingUtilities.windowForComponent(Back).dispose();
+            }
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Back);
+
+        // Other components...
+        
+        JLabel name1 = new JLabel("Name");
+        name1.setBounds(10, 189, 128, 34);
+        name1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(name1);
+        
+        name = new JTextField();
+        name.setBounds(10, 233, 226, 43);
+        name.setColumns(10);
+        contentPane.add(name);
+        
+        JLabel no4 = new JLabel("Mobile Number");
+        no4.setBounds(10, 441, 128, 34);
+        no4.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(no4);
+
+        no = new JTextField();
+        no.setBounds(10, 472, 226, 43);
+        no.setColumns(10);
+        contentPane.add(no);
+
+        JLabel email5 = new JLabel("Email");
+        email5.setBounds(387, 92, 128, 34);
+        email5.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(email5);
+
+        JLabel ads = new JLabel("Address");
+        ads.setBounds(387, 201, 128, 34);
+        ads.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(ads);
+
+        address = new JTextField();
+        address.setBounds(382, 245, 226, 43);
+        address.setColumns(10);
+        contentPane.add(address);
+
+        JButton btnNewButton1 = new JButton("Save");
+        btnNewButton1.setBounds(327, 574, 103, 31);
+        btnNewButton1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+
+                    // Concatenate selected day, month, and year to form the date of birth
+                    String dobValue = dayComboBox.getSelectedItem() + " " + monthComboBox.getSelectedItem() + " " + yearComboBox.getSelectedItem();
+
+                    String sql = "INSERT INTO add_user VALUES (?, ?, ?, ?, ?,?)";
+                    PreparedStatement pts = con.prepareStatement(sql);
+                    pts.setString(1, id.getText());
+                    pts.setString(2, name.getText());
+                    pts.setString(3, dobValue);
+                    pts.setString(4, no.getText());
+                    pts.setString(5, textField.getText());
+                    pts.setString(6, address.getText());
+                    pts.executeUpdate();
+                    JOptionPane.showMessageDialog(null, "user id has been registered");
+
+                } catch (Exception ex) {
+                    JOptionPane.showMessageDialog(null, "Error: user id has not been registered");
+                    ex.printStackTrace();
+                }
+            }
+        });
+        btnNewButton1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton1);
+
+        JButton back = new JButton("Back");
+        Back.setBounds(71, 574, 103, 31);
+        Back.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Dashboard newframe = new Dashboard();
+                newframe.setVisible(true);
+                SwingUtilities.windowForComponent(Back).dispose();
+            }
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Back);
+
+        JLabel id2 = new JLabel("Id");
+        id2.setBounds(10, 109, 128, 34);
+        id2.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(id2);
+
+        id = new JTextField();
+        id.setBounds(10, 150, 226, 43);
+        id.setColumns(10);
+        contentPane.add(id);
+        
+        textField = new JTextField();
+        textField.setColumns(10);
+        textField.setBounds(382, 132, 226, 43);
+        contentPane.add(textField);
+    }
+}
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import javax.swing.JScrollPane;
+import java.awt.Color;
+import javax.swing.ImageIcon;
+
+public class VIEWUSER extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JTable table;
+	private JTable table_1;
+	private JButton Back;
+	private JScrollPane scrollPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					VIEWUSER frame = new VIEWUSER();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public VIEWUSER() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 914, 518);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("View User");
+		lblNewLabel.setBounds(296, 23, 194, 39);
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(lblNewLabel);
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(10, 59, 839, 15);
+		contentPane.add(separator);
+		
+		table = new JTable();
+		table.setBounds(333, 169, 1, 1);
+		table.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(table);
+		
+		scrollPane = 
+				new JScrollPane();
+		scrollPane.setBounds(10, 72, 839, 287);
+		contentPane.add(scrollPane);
+		
+		table_1 = new JTable();
+		table_1.setForeground(new Color(0, 0, 0));
+		scrollPane.setViewportView(table_1);
+		table_1.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+				{null, null, null, null, null, null},
+			},
+			new String[] {
+				"ID", "Name", "Date of birth(dob)", "Mobile Number", "Email", "Address"
+			}
+		));
+		table_1.getColumnModel().getColumn(0).setPreferredWidth(86);
+		table_1.getColumnModel().getColumn(1).setPreferredWidth(86);
+		table_1.getColumnModel().getColumn(2).setPreferredWidth(103);
+		table_1.getColumnModel().getColumn(3).setPreferredWidth(86);
+		table_1.getColumnModel().getColumn(4).setPreferredWidth(138);
+		table_1.getColumnModel().getColumn(5).setPreferredWidth(91);
+		table_1.setFont(new Font("Tahoma", Font.BOLD, 11));
+		
+		Back = new JButton("Back");
+		Back.setBounds(10, 405, 109, 31);
+		Back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					Dashboard newframe = new Dashboard();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Back).dispose();
+			}
+		});
+		Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(Back);
+		
+		JButton show = new JButton("show");
+		show.setBounds(296, 405, 110, 31);
+		show.setFont(new Font("Tahoma", Font.BOLD, 20));
+		show.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+			try {
+				Class.forName("com.mysql.cj.jdbc.Driver");
+				Connection con = (Connection)DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+				Statement si=(Statement) con.createStatement();
+				String sql="select * from add_user";
+				
+				PreparedStatement pts=con.prepareStatement(sql);
+				ResultSet rs= pts.executeQuery();
+				    DefaultTableModel dt=(DefaultTableModel)table_1.getModel();
+				dt.setRowCount(0);
+				while(rs.next()) {
+				
+				Object o[]= {rs.getString("id"),rs.getString("Name"),rs.getString("DOB"),rs.getString("MobileNumber"),rs.getString("Email"),rs.getString("Address")};
+				dt.addRow(o);
+				}
+		}
+			catch(Exception ec) {
+				JOptionPane.showMessageDialog(null,"it has not been registered");
+				ec.printStackTrace();
+			}
+			}
+		});
+		contentPane.add(show);
+	}
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.JButton;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import javax.swing.JTable;
+import javax.swing.JScrollPane;
+import java.awt.Color;
+import javax.swing.JComboBox;
+
+public class updateuser extends JFrame {
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField Name;
+    private JTextField Em;
+    private JTextField MN;
+    private JTextField id;
+    private JTable table;
+
+    private JComboBox<String> dayComboBox;
+    private JComboBox<String> monthComboBox;
+    private JComboBox<String> yearComboBox;
+    private JTextField textField;
+    private JTextField textField_1;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    updateuser frame = new updateuser();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public updateuser() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 1117, 740);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel lblNewLabel = new JLabel("UPDATE");
+        lblNewLabel.setBounds(320, 10, 135, 53);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+        contentPane.add(lblNewLabel);
+
+        JSeparator separator = new JSeparator();
+        separator.setBounds(10, 55, 989, 20);
+        contentPane.add(separator);
+
+        JLabel lblNewLabel_1_1 = new JLabel("Name");
+        lblNewLabel_1_1.setBounds(20, 262, 111, 27);
+        lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_1);
+
+        JLabel lblNewLabel_1_2 = new JLabel("DOB(Date of Birth)");
+        lblNewLabel_1_2.setBounds(20, 337, 146, 27);
+        lblNewLabel_1_2.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_2);
+
+        JLabel lblNewLabel_1_3 = new JLabel("Email");
+        lblNewLabel_1_3.setBounds(320, 186, 111, 27);
+        lblNewLabel_1_3.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_3);
+
+        Name = new JTextField();
+        Name.setBounds(30, 288, 210, 39);
+        Name.setColumns(10);
+        contentPane.add(Name);
+
+        // Combo boxes for Date of Birth
+        dayComboBox = new JComboBox<>();
+        dayComboBox.setBounds(30, 374, 60, 39);
+        for (int i = 1; i <= 31; i++) {
+            dayComboBox.addItem(String.format("%02d", i));
+        }
+        contentPane.add(dayComboBox);
+
+        monthComboBox = new JComboBox<>();
+        monthComboBox.setBounds(100, 374, 60, 39);
+        for (int i = 1; i <= 12; i++) {
+            monthComboBox.addItem(String.format("%02d", i));
+        }
+        contentPane.add(monthComboBox);
+
+        yearComboBox = new JComboBox<>();
+        yearComboBox.setBounds(170, 374, 70, 39);
+        for (int i = 1900; i <= 2024; i++) {
+            yearComboBox.addItem(String.valueOf(i));
+        }
+        contentPane.add(yearComboBox);
+
+        Em = new JTextField();
+        Em.setBounds(320, 213, 222, 39);
+        Em.setColumns(10);
+        contentPane.add(Em);
+
+        JLabel lblNewLabel_1_3_1 = new JLabel("Mobile Number");
+        lblNewLabel_1_3_1.setBounds(20, 443, 146, 27);
+        lblNewLabel_1_3_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_3_1);
+
+        MN = new JTextField();
+        MN.setBounds(30, 480, 210, 39);
+        MN.setColumns(10);
+        contentPane.add(MN);
+
+        JLabel lblNewLabel_1_3_2 = new JLabel("Address");
+        lblNewLabel_1_3_2.setBounds(320, 292, 111, 27);
+        lblNewLabel_1_3_2.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_3_2);
+
+        JButton btnNewButton_1 = new JButton("Update");
+        btnNewButton_1.setBounds(272, 603, 135, 39);
+        btnNewButton_1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                String i = id.getText();
+                String n = Name.getText();
+                String d = yearComboBox.getSelectedItem() + "-" + monthComboBox.getSelectedItem() + "-" + dayComboBox.getSelectedItem();
+                String m = MN.getText();
+                String em = Em.getText();
+                String a = new String(textField_1.getText());
+
+                try {
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection con1 = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+
+                    PreparedStatement pst = con1.prepareStatement("update add_user set Name=?, DOB=?, MobileNumber=?, Email=?, Address=? where id=?");
+
+                    pst.setString(1, n);
+                    pst.setString(2, d);
+                    pst.setString(3, m);
+                    pst.setString(4, em);
+                    pst.setString(5, a);
+                    pst.setString(6, i);
+
+                    int rowsAffected = pst.executeUpdate();
+                    if (rowsAffected > 0) {
+                        JOptionPane.showMessageDialog(null, "Successfully updated");
+                        setVisible(false);
+                        new Dashboard().setVisible(true);
+                    } else {
+                        JOptionPane.showMessageDialog(null, "Failed to update");
+                    }
+
+                    pst.close();
+                    con1.close();
+                } catch (Exception e1) {
+                    e1.printStackTrace();
+                }
+            }
+        });
+        btnNewButton_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton_1);
+
+        JLabel lblNewLabel_1_4 = new JLabel("User Role");
+        lblNewLabel_1_4.setBounds(20, 113, 146, 39);
+        lblNewLabel_1_4.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_4);
+
+        JButton Back = new JButton("Back");
+        Back.setBounds(55, 603, 135, 39);
+        Back.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                Dashboard newframe = new Dashboard();
+                newframe.setVisible(true);
+                SwingUtilities.windowForComponent(Back).dispose();
+            }
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(Back);
+
+        JButton btnNewButton_1_1 = new JButton("Delete");
+        btnNewButton_1_1.setBounds(519, 603, 135, 39);
+        btnNewButton_1_1.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+                    Statement st = conn.createStatement();
+                    String i = id.getText();
+                    String sql = "DELETE FROM add_user WHERE id='" + i + "'";
+                    st.executeUpdate(sql);
+                    JOptionPane.showMessageDialog(null, "Deleted from users", "Delete Success", 3);
+                } catch (Exception s) {
+                    JOptionPane.showMessageDialog(null, s, "Delete Failed", 3);
+                }
+            }
+        });
+        btnNewButton_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnNewButton_1_1);
+
+        JLabel lblNewLabel_1_1_1 = new JLabel("id");
+        lblNewLabel_1_1_1.setBounds(20, 186, 111, 27);
+        lblNewLabel_1_1_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_1_1);
+
+        id = new JTextField();
+        id.setBounds(30, 213, 210, 39);
+        id.setColumns(10);
+        contentPane.add(id);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(597, 194, 500, 337);
+        contentPane.add(scrollPane);
+
+        table = new JTable();
+        scrollPane.setViewportView(table);
+
+        JButton btnShow = new JButton("Show");
+        btnShow.setBounds(740, 603, 135, 39);
+        btnShow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    table.setModel(new DefaultTableModel());
+
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+                    Statement st = conn.createStatement();
+                    String sql = "Select * from add_user";
+                    ResultSet rs = st.executeQuery(sql);
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+                    int cols = rsmd.getColumnCount();
+                    String[] colName = new String[cols];
+
+                    for (int i = 0; i < cols; i++) {
+                        colName[i] = rsmd.getColumnName(i + 1).toUpperCase();
+                    }
+                    model.setColumnIdentifiers(colName);
+
+                    String n, f, l, p, g, b;
+                    while (rs.next()) {
+                        n = rs.getString(1);
+                        f = rs.getString(2);
+                        l = rs.getString(3);
+                        p = rs.getString(4);
+                        g = rs.getString(5);
+                        b = rs.getString(6);
+                        String[] rows = {n, f, l, p, g, b};
+                        model.addRow(rows);
+                    }
+                    st.close();
+                    conn.close();
+
+                } catch (Exception E) {
+                    JOptionPane.showMessageDialog(null, E, "Refresh Failed", 3);
+                }
+            }
+        });
+        btnShow.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnShow);
+
+        JButton btnNewButton_2 = new JButton("Search");
+        btnNewButton_2.setBounds(939, 616, 130, 40);
+        btnNewButton_2.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    table.setModel(new DefaultTableModel());
+
+                    Class.forName("com.mysql.cj.jdbc.Driver");
+                    Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+                    Statement st = conn.createStatement();
+                    String v = id.getText();
+                    String sql = "Select * from add_user where id='" + v + "'";
+                    ResultSet rs = st.executeQuery(sql);
+                    ResultSetMetaData rsmd = rs.getMetaData();
+                    DefaultTableModel model = (DefaultTableModel) table.getModel();
+
+                    int cols = rsmd.getColumnCount();
+                    String[] colName = new String[cols];
+
+                    for (int i = 0; i < cols; i++) {
+                        colName[i] = rsmd.getColumnName(i + 1).toUpperCase();
+                    }
+                    model.setColumnIdentifiers(colName);
+
+                    String n, f, l, p, g, b;
+                    while (rs.next()) {
+                        n = rs.getString(1);
+                        f = rs.getString(2);
+                        l = rs.getString(3);
+                        p = rs.getString(4);
+                        g = rs.getString(5);
+                        b = rs.getString(6);
+                        String[] rows = {n, f, l, p, g, b};
+                        model.addRow(rows);
+                    }
+                    st.close();
+                    conn.close();
+
+                } catch (Exception E) {
+                    JOptionPane.showMessageDialog(null, E, "Search Failed", 3);
+                }
+            }
+        });
+
+        btnNewButton_2.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnNewButton_2);
+        
+        textField_1 = new JTextField();
+        textField_1.setColumns(10);
+        textField_1.setBounds(320, 343, 222, 39);
+        contentPane.add(textField_1);
+        
+        JLabel lblUser = new JLabel("USER");
+        lblUser.setFont(new Font("Tahoma", Font.BOLD, 30));
+        lblUser.setBounds(475, 10, 135, 53);
+        contentPane.add(lblUser);
+    }
+}
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+
+public class AdminDashboard extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					AdminDashboard frame = new AdminDashboard();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public AdminDashboard() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 641, 670);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("Admin Dashboard");
+		lblNewLabel.setBounds(155, 10, 306, 48);
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+		contentPane.add(lblNewLabel);
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(10, 63, 737, 28);
+		contentPane.add(separator);
+		
+		JButton Addmedicine = new JButton("Add Medicine");
+		Addmedicine.setBounds(32, 137, 241, 48);
+		Addmedicine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					Addmedicine newframe = new Addmedicine();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Addmedicine).dispose();
+			}
+		});
+		Addmedicine.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(Addmedicine);
+		
+		JButton ViewMedicine = new JButton("View Medicine");
+		ViewMedicine.setBounds(32, 244, 241, 48);
+		ViewMedicine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 viewmedicine frame = new viewmedicine();
+	                frame.setVisible(true);
+	                dispose();
+			}
+		});
+		ViewMedicine.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(ViewMedicine);
+		
+		JButton Logout = new JButton("Logout");
+		Logout.setBounds(201, 516, 241, 48);
+		Logout.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					login newframe = new login();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Logout).dispose();
+			}
+		});
+		Logout.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(Logout);
+		
+		JButton btnSellMedicine = new JButton("Sell Medicine");
+		btnSellMedicine.setBounds(357, 137, 235, 48);
+		btnSellMedicine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 sellmedicine frame = new sellmedicine();
+	                frame.setVisible(true);
+	                dispose();
+			}
+		});
+		btnSellMedicine.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(btnSellMedicine);
+		
+		JButton btnViewMedicine_1 = new JButton("View Bill");
+		btnViewMedicine_1.setBounds(357, 353, 241, 48);
+		btnViewMedicine_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				new viewbill().setVisible(true);
+				 viewbill frame = new viewbill();
+	                frame.setVisible(true);
+	                dispose();
+			}
+		});
+		btnViewMedicine_1.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(btnViewMedicine_1);
+		
+		JButton btnUpdateMedicine = new JButton("Update Medicine");
+		btnUpdateMedicine.setBounds(32, 353, 261, 48);
+		btnUpdateMedicine.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 updatemedicine frame = new updatemedicine();
+	                frame.setVisible(true);
+	                dispose();
+			}
+		});
+		btnUpdateMedicine.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(btnUpdateMedicine);
+		
+		JButton btnViewMedicine_1_1 = new JButton("Add bill");
+		btnViewMedicine_1_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				bill info = new bill();
+				bill.main(null);
+				dispose();
+			}
+		});
+		btnViewMedicine_1_1.setBounds(351, 256, 241, 48);
+		btnViewMedicine_1_1.setFont(new Font("Tahoma", Font.BOLD, 25));
+		contentPane.add(btnViewMedicine_1_1);
+	}
+
+}
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import java.awt.Color;
+
+public class Addmedicine extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField mid;
+    private JTextField mn;
+    private JTextField mc;
+    private JTextField mq;
+    private JTextField price1;
+    private JComboBox<String> mfgDayComboBox;
+    private JComboBox<String> mfgMonthComboBox;
+    private JComboBox<String> mfgYearComboBox;
+    private JComboBox<String> expDayComboBox;
+    private JComboBox<String> expMonthComboBox;
+    private JComboBox<String> expYearComboBox;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    Addmedicine frame = new Addmedicine();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public Addmedicine() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 800, 800);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel lblNewLabel = new JLabel("Add Medicine");
+        lblNewLabel.setBounds(256, 10, 236, 43);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 35));
+        contentPane.add(lblNewLabel);
+
+        JLabel lblNewLabel_1 = new JLabel("Medicine_ID");
+        lblNewLabel_1.setBounds(25, 80, 236, 43);
+        lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1);
+
+        JLabel lblNewLabel_1_1 = new JLabel("Medicine_Name");
+        lblNewLabel_1_1.setBounds(25, 160, 236, 43);
+        lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_1);
+
+        JLabel lblNewLabel_1_2 = new JLabel("Company_Name");
+        lblNewLabel_1_2.setBounds(25, 240, 236, 43);
+        lblNewLabel_1_2.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_2);
+
+        JLabel lblNewLabel_1_3 = new JLabel("Mfg_Date");
+        lblNewLabel_1_3.setForeground(new Color(0, 0, 0));
+        lblNewLabel_1_3.setBounds(25, 320, 236, 43);
+        lblNewLabel_1_3.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_3);
+
+        JLabel lblNewLabel_1_4 = new JLabel("Exp_Date");
+        lblNewLabel_1_4.setBounds(25, 400, 236, 43);
+        lblNewLabel_1_4.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_4);
+
+        JLabel lblNewLabel_1_5 = new JLabel("Quantity");
+        lblNewLabel_1_5.setBounds(25, 480, 236, 43);
+        lblNewLabel_1_5.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_5);
+
+        JLabel lblNewLabel_1_6 = new JLabel("Price_per_Unit");
+        lblNewLabel_1_6.setBounds(25, 560, 236, 43);
+        lblNewLabel_1_6.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(lblNewLabel_1_6);
+
+        mid = new JTextField();
+        mid.setBounds(270, 80, 290, 37);
+        contentPane.add(mid);
+        mid.setColumns(10);
+
+        mn = new JTextField();
+        mn.setBounds(270, 160, 290, 37);
+        contentPane.add(mn);
+        mn.setColumns(10);
+
+        mc = new JTextField();
+        mc.setBounds(270, 240, 290, 37);
+        contentPane.add(mc);
+        mc.setColumns(10);
+
+        // Mfg_Date Combo Boxes
+        String[] days = new String[31];
+        for (int i = 0; i < 31; i++) {
+            days[i] = String.valueOf(i + 1);
+        }
+
+        String[] months = {"January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"};
+        String[] years = new String[30];
+        for (int i = 0; i < 30; i++) {
+            years[i] = String.valueOf(2020 + i);
+        }
+
+        mfgDayComboBox = new JComboBox<>(days);
+        mfgDayComboBox.setBounds(270, 320, 60, 37);
+        contentPane.add(mfgDayComboBox);
+
+        mfgMonthComboBox = new JComboBox<>(months);
+        mfgMonthComboBox.setBounds(350, 320, 90, 37);
+        contentPane.add(mfgMonthComboBox);
+
+        mfgYearComboBox = new JComboBox<>(years);
+        mfgYearComboBox.setBounds(460, 320, 90, 37);
+        contentPane.add(mfgYearComboBox);
+
+        // Exp_Date Combo Boxes
+        expDayComboBox = new JComboBox<>(days);
+        expDayComboBox.setBounds(270, 400, 60, 37);
+        contentPane.add(expDayComboBox);
+
+        expMonthComboBox = new JComboBox<>(months);
+        expMonthComboBox.setBounds(350, 400, 90, 37);
+        contentPane.add(expMonthComboBox);
+
+        expYearComboBox = new JComboBox<>(years);
+        expYearComboBox.setBounds(460, 400, 90, 37);
+        contentPane.add(expYearComboBox);
+
+        mq = new JTextField();
+        mq.setBounds(270, 480, 290, 37);
+        contentPane.add(mq);
+        mq.setColumns(10);
+
+        price1 = new JTextField();
+        price1.setBounds(270, 560, 290, 37);
+        contentPane.add(price1);
+        price1.setColumns(10);
+
+        JButton btnSave = new JButton("Save");
+        btnSave.setBounds(270, 630, 140, 33);
+        btnSave.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveMedicine();
+            }
+        });
+        btnSave.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnSave);
+
+        JButton Back = new JButton("Back");
+        Back.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminDashboard newframe = new AdminDashboard();
+                newframe.setVisible(true);
+                SwingUtilities.windowForComponent(Back).dispose();
+            }
+        });
+        Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+        Back.setBounds(420, 630, 140, 33);
+        contentPane.add(Back);
+    }
+
+    private void saveMedicine() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String sql = "INSERT INTO medicine2 VALUES (?, ?, ?, ?, ?, ?, ?)";
+            PreparedStatement pts = con.prepareStatement(sql);
+            pts.setString(1, mid.getText());
+            pts.setString(2, mn.getText());
+            pts.setString(3, mc.getText());
+
+            // Constructing Manufacturing Date
+            String mfgDate = mfgYearComboBox.getSelectedItem() + "-" + (mfgMonthComboBox.getSelectedIndex() + 1) + "-" + mfgDayComboBox.getSelectedItem();
+            pts.setString(4, mfgDate);
+
+            // Constructing Expiry Date
+            String expDate = expYearComboBox.getSelectedItem() + "-" + (expMonthComboBox.getSelectedIndex() + 1) + "-" + expDayComboBox.getSelectedItem();
+            pts.setString(5, expDate);
+
+            pts.setString(6, mq.getText());
+            pts.setString(7, price1.getText());
+            pts.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Medicine has been registered");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: Medicine has not been registered");
+            ex.printStackTrace();
+        }
+    }
+}
+import java.awt.EventQueue;
+import java.awt.Font;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.Statement;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+
+import javax.swing.JButton;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.border.EmptyBorder;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+
+
+
+public class viewmedicine extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JTable table;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					viewmedicine frame = new viewmedicine();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public viewmedicine() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 764, 613);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("View Medicine");
+		lblNewLabel.setBounds(269, 21, 301, 52);
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 35));
+		contentPane.add(lblNewLabel);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(10, 86, 735, 411);
+		contentPane.add(scrollPane);
+		
+		table = new JTable();
+		scrollPane.setViewportView(table);
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+			},
+			new String[] {
+				"Medicine_Id", "Medicine_Name", "company_Name", "Mfg_Date", "Exp_Date", "Quantity", "price_per_Unit"
+			}
+		));
+		table.getColumnModel().getColumn(1).setPreferredWidth(88);
+		table.getColumnModel().getColumn(2).setPreferredWidth(87);
+		table.getColumnModel().getColumn(4).setPreferredWidth(87);
+		table.getColumnModel().getColumn(6).setPreferredWidth(77);
+		
+		JButton btnUpdate = new JButton("Show");
+		btnUpdate.setBounds(371, 515, 140, 33);
+		btnUpdate.addActionListener(new ActionListener() {
+			@SuppressWarnings("rawtypes")
+			public void actionPerformed(ActionEvent e) {
+				
+				
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver");
+					Connection con = (Connection)DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+					Statement st=(Statement) con.createStatement();
+					String sql="select * from medicine2";
+					
+					PreparedStatement pts=con.prepareStatement(sql);
+					ResultSet rs= pts.executeQuery();
+					    DefaultTableModel dt=(DefaultTableModel)table.getModel();
+					dt.setRowCount(0);
+					while(rs.next()) {
+					
+					Object o[]= {rs.getString("Medicine_Id"),rs.getString("Medicine_Name"),rs.getString("Company_Name"),rs.getString("Mfg_Date"),rs.getString("Exp_Date"),rs.getString("Quantity"),rs.getString("Price_per_Unit")};
+					dt.addRow(o);
+					}
+			}
+				catch(Exception ec) {
+					JOptionPane.showMessageDialog(null,"it has not been registered");
+					ec.printStackTrace();
+				}
+			}
+		});
+		btnUpdate.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnUpdate);
+		
+		JButton Back = new JButton("Back");
+		Back.setBounds(39, 515, 140, 33);
+		Back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+					AdminDashboard newframe = new AdminDashboard();
+				    newframe.setVisible(true);
+					SwingUtilities.windowForComponent(Back).dispose();
+			}
+		});
+		Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(Back);
+	}
+}
+import java.awt.EventQueue;
+
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import javax.swing.JTable;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
+import java.awt.Color;
+
+public class updatemedicine extends JFrame {
+
+	private static final long serialVersionUID = 1L;
+	private JPanel contentPane;
+	private JTextField textField;
+	private JTextField textField_1;
+	private JTextField textField_2;
+	private JTextField textField_3;
+	private JTextField textField_4;
+	private JTable table;
+	private JTextField textField_6_1;
+	private JTextField search;
+	private JTextField textField_5;
+
+	/**
+	 * Launch the application.
+	 */
+	public static void main(String[] args) {
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					updatemedicine frame = new updatemedicine();
+					frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+	}
+
+	/**
+	 * Create the frame.
+	 */
+	public updatemedicine() {
+		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		setBounds(100, 100, 1118, 795);
+		contentPane = new JPanel();
+		contentPane.setBackground(new Color(255, 128, 0));
+		contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+
+		setContentPane(contentPane);
+		contentPane.setLayout(null);
+		
+		JLabel lblNewLabel = new JLabel("Update Medicine");
+		lblNewLabel.setBounds(220, -27, 319, 85);
+		lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+		contentPane.add(lblNewLabel);
+		
+		JSeparator separator = new JSeparator();
+		separator.setBounds(305, 185, 0, 0);
+		contentPane.add(separator);
+		
+		JSeparator separator_1 = new JSeparator();
+		separator_1.setBounds(28, 30, 990, 28);
+		contentPane.add(separator_1);
+		
+		JLabel lblNewLabel_1 = new JLabel("Medicine ID");
+		lblNewLabel_1.setBounds(10, 48, 150, 28);
+		lblNewLabel_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblNewLabel_1);
+		
+		textField = new JTextField();
+		textField.setBounds(139, 47, 201, 40);
+		contentPane.add(textField);
+		textField.setColumns(10);
+		
+		JLabel lblNewLabel_1_1 = new JLabel("Name");
+		lblNewLabel_1_1.setBounds(10, 118, 150, 28);
+		lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblNewLabel_1_1);
+		
+		JLabel lblNewLabel_1_2 = new JLabel("Company Name");
+		lblNewLabel_1_2.setBounds(10, 185, 214, 28);
+		lblNewLabel_1_2.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblNewLabel_1_2);
+		
+		textField_1 = new JTextField();
+		textField_1.setBounds(101, 117, 276, 40);
+		textField_1.setColumns(10);
+		contentPane.add(textField_1);
+		
+		textField_2 = new JTextField();
+		textField_2.setBounds(20, 223, 285, 40);
+		textField_2.setColumns(10);
+		contentPane.add(textField_2);
+		
+		textField_3 = new JTextField();
+		textField_3.setBounds(28, 322, 285, 40);
+		textField_3.setColumns(10);
+		contentPane.add(textField_3);
+		
+		JButton btnUpdate = new JButton("update");
+		btnUpdate.setBounds(481, 539, 129, 28);
+		btnUpdate.addActionListener(new ActionListener() {
+			
+			public void actionPerformed(ActionEvent e) {
+				String i = textField.getText();
+				String mn = textField_1.getText();
+				String cn = textField_2.getText();
+				String mfg = textField_3.getText();
+				String exp = textField_4.getText();
+				String q = textField_5.getText();
+				String ppu = textField_6_1.getText();
+		
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver");
+        			Connection con1 = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+				   
+					PreparedStatement pst = con1.prepareStatement("update medicine2 set Medicine_Name=?, Company_Name=?, Mfg_Date=?, Exp_Date=?, Quantity=?, Price_per_Unit=? where Medicine_ID=?");
+				    pst.setString(1, mn);
+				    pst.setString(2, cn);
+				    pst.setString(3, mfg);
+				    pst.setString(4, exp);
+				    pst.setString(5, q);
+				    pst.setString(6, ppu);
+				    pst.setString(7, i);
+				    
+				    int rowsAffected = pst.executeUpdate();
+				    if (rowsAffected > 0) {
+				        JOptionPane.showMessageDialog(null, "Successfully updated");
+				        setVisible(false);
+				        new Dashboard().setVisible(true);
+				    } else {
+				        JOptionPane.showMessageDialog(null, "Failed to update");
+				    }
+				    
+				    pst.close();
+				    con1.close();
+				} catch (Exception e1) {
+				    e1.printStackTrace();
+				    // Handle any SQL errors
+				}
+			}
+		});
+		btnUpdate.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnUpdate);
+		
+		JButton Back = new JButton("Back");
+		Back.setBounds(380, 626, 129, 28);
+		Back.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				AdminDashboard newframe = new AdminDashboard();
+				newframe.setVisible(true);
+				SwingUtilities.windowForComponent(Back).dispose();
+			}
+		});
+		Back.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(Back);
+		
+		JButton btnDelete = new JButton("Delete");
+		btnDelete.setBounds(670, 539, 129, 28);
+		btnDelete.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String code = textField.getText();
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver");
+					Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+					String sql = "delete from medicine2 WHERE Medicine_ID=?";
+					PreparedStatement pts = con.prepareStatement(sql);
+					pts.setString(1, code);
+					
+					pts.execute();
+					JOptionPane.showMessageDialog(null, "It has been deleted");
+				} catch (Exception ec) {
+					JOptionPane.showMessageDialog(null, "It has not been deleted");
+					ec.printStackTrace();
+				}
+			}
+		});
+		btnDelete.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnDelete);
+		
+		JScrollPane scrollPane = new JScrollPane();
+		scrollPane.setBounds(366, 190, 639, 307);
+		contentPane.add(scrollPane);
+		
+		table = new JTable();
+		scrollPane.setViewportView(table);
+		table.setModel(new DefaultTableModel(
+			new Object[][] {
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+				{null, null, null, null, null, null, null},
+			},
+			new String[] {
+				"Medicine_ID", "Medicine_Name", "Company_Name", "Mfg-Date", "Exp_Date", "Quantity", "Price_per_Unit"
+			}
+		));
+		table.getColumnModel().getColumn(0).setPreferredWidth(79);
+		table.getColumnModel().getColumn(1).setPreferredWidth(90);
+		table.getColumnModel().getColumn(2).setPreferredWidth(85);
+		table.getColumnModel().getColumn(3).setPreferredWidth(82);
+		table.getColumnModel().getColumn(4).setPreferredWidth(86);
+		table.getColumnModel().getColumn(6).setPreferredWidth(79);
+		
+		JButton btnNewButton_1_1 = new JButton("show");
+		btnNewButton_1_1.setBounds(841, 534, 135, 39);
+		btnNewButton_1_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				try {
+					Class.forName("com.mysql.cj.jdbc.Driver");
+					Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+					Statement st = con.createStatement();
+					String sql = "select * from medicine2";
+					
+					PreparedStatement pts = con.prepareStatement(sql);
+					ResultSet rs = pts.executeQuery();
+					DefaultTableModel dt = (DefaultTableModel) table.getModel();
+					dt.setRowCount(0);
+					while (rs.next()) {
+						Object[] o = {
+							rs.getString("Medicine_ID"),
+							rs.getString("Medicine_Name"),
+							rs.getString("Company_Name"),
+							rs.getString("Mfg_Date"),
+							rs.getString("Exp_Date"),
+							rs.getString("Quantity"),
+							rs.getString("Price_per_Unit")
+						};
+						dt.addRow(o);
+					}
+					con.close();
+				} catch (Exception ec) {
+					JOptionPane.showMessageDialog(null, "Error displaying records");
+					ec.printStackTrace();
+				}
+			}
+		});
+		btnNewButton_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnNewButton_1_1);
+		
+		textField_4 = new JTextField();
+		textField_4.setBounds(28, 402, 285, 40);
+		textField_4.setColumns(10);
+		contentPane.add(textField_4);
+		
+		JLabel lblNewLabel_1_3_1 = new JLabel("Quantity");
+		lblNewLabel_1_3_1.setBounds(28, 467, 150, 28);
+		lblNewLabel_1_3_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblNewLabel_1_3_1);
+		
+		JLabel mfg_1_1 = new JLabel("mfg_date");
+		mfg_1_1.setBounds(28, 296, 150, 28);
+		mfg_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(mfg_1_1);
+		
+		JLabel exp_date_1_1 = new JLabel("exp_date");
+		exp_date_1_1.setBounds(28, 372, 150, 28);
+		exp_date_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(exp_date_1_1);
+		
+		textField_6_1 = new JTextField();
+		textField_6_1.setBounds(20, 596, 303, 40);
+		textField_6_1.setColumns(10);
+		contentPane.add(textField_6_1);
+		
+		JLabel lblNewLabel_1_4_1_1 = new JLabel("Price Per Unit");
+		lblNewLabel_1_4_1_1.setBounds(28, 558, 150, 28);
+		lblNewLabel_1_4_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(lblNewLabel_1_4_1_1);
+		
+		JButton btnNewButton = new JButton("Search");
+		btnNewButton.setBounds(530, 118, 129, 28);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				 try {
+			            Class.forName("com.mysql.cj.jdbc.Driver");
+			            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+			            String query = "SELECT * FROM medicine2 WHERE Medicine_Name LIKE ?";
+			            PreparedStatement pts = con.prepareStatement(query);
+			            pts.setString(1, search.getText() + "%");
+			            ResultSet rs = pts.executeQuery();
+			            DefaultTableModel dt = (DefaultTableModel) table.getModel();
+			            dt.setRowCount(0);
+			            while (rs.next()) {
+			                Object[] row = {
+			                    rs.getString("Medicine_ID"),
+			                    rs.getString("Medicine_Name"),
+			                    rs.getString("Company_Name"),
+			                    rs.getString("Mfg_Date"),
+			                    rs.getString("Exp_Date"),
+			                    rs.getString("Quantity"),
+			                    rs.getString("Price_per_Unit")
+			                };
+			                dt.addRow(row);
+			            }
+			            con.close();
+			        } catch (Exception ex) {
+			            ex.printStackTrace();
+			            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+			        }
+			}
+		});
+		btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 20));
+		contentPane.add(btnNewButton);
+		
+		search = new JTextField();
+		search.setBounds(519, 56, 214, 40);
+		contentPane.add(search);
+		search.setColumns(10);
+		
+		textField_5 = new JTextField();
+		textField_5.setColumns(10);
+		textField_5.setBounds(29, 505, 276, 40);
+		contentPane.add(textField_5);
+	}
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JTextField;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
+import javax.swing.JButton;
+import javax.swing.UIManager;
+import javax.swing.JTable;
+import javax.swing.JTextArea;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
+import java.awt.event.ActionListener;
+import java.awt.print.PrinterException;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.awt.event.ActionEvent;
+import java.awt.event.KeyAdapter;
+import java.awt.event.KeyEvent;
+
+public class sellmedicine extends JFrame {
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField textField;
+    private JTextField textField_1;
+    private JTextField textField_3;
+    private JTable table;
+    private JTextField textField_4;
+    private JTextField textField_5;
+    private JTextField textField_6;
+    private JTextField textField_2;
+
+    // List to store selected medicines
+    private List<String[]> selectedMedicines = new ArrayList<>();
+    private JTable table_1;
+	private String output;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    sellmedicine frame = new sellmedicine();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public sellmedicine() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 1047, 747);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        textField = new JTextField();
+        textField.setBounds(161, 46, 199, 30);
+        contentPane.add(textField);
+        textField.setColumns(10);
+        SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyy");
+        Calendar cp = Calendar.getInstance();
+        output = sdf.format(cp.getTime());
+        JLabel lblNewLabel = new JLabel("Medicine_Name");
+        lblNewLabel.setBounds(10, 43, 141, 30);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblNewLabel.setBackground(new Color(240, 240, 240));
+        contentPane.add(lblNewLabel);
+
+        // Add a KeyListener to the text field to handle search suggestions
+        textField.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyReleased(KeyEvent e) {
+                searchMedicines(textField.getText());
+            }
+        });
+
+        JButton btnNewButton = new JButton("Search");
+        btnNewButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                searchMedicines(textField.getText());
+            }
+        });
+        btnNewButton.setBounds(383, 43, 102, 30);
+        btnNewButton.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnNewButton);
+
+        JLabel lblPriceperunit = new JLabel("Price_per_Unit");
+        lblPriceperunit.setBounds(10, 102, 141, 30);
+        lblPriceperunit.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblPriceperunit.setBackground(UIManager.getColor("Button.background"));
+        contentPane.add(lblPriceperunit);
+
+        JLabel lblQuantity = new JLabel("Quantity");
+        lblQuantity.setBounds(10, 147, 141, 30);
+        lblQuantity.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblQuantity.setBackground(UIManager.getColor("Button.background"));
+        contentPane.add(lblQuantity);
+
+        JLabel lblTotalprice = new JLabel("Total_Price");
+        lblTotalprice.setBounds(10, 196, 141, 30);
+        lblTotalprice.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblTotalprice.setBackground(UIManager.getColor("Button.background"));
+        contentPane.add(lblTotalprice);
+
+        textField_1 = new JTextField();
+        textField_1.setBounds(161, 102, 199, 30);
+        textField_1.setColumns(10);
+        contentPane.add(textField_1);
+
+        textField_3 = new JTextField();
+        textField_3.setBounds(161, 199, 199, 30);
+        textField_3.setColumns(10);
+        contentPane.add(textField_3);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(27, 490, 890, 166);
+        contentPane.add(scrollPane);
+
+        table = new JTable();
+        scrollPane.setViewportView(table);
+        table.setModel(new DefaultTableModel(
+            new Object[][] {},
+            new String[] {
+                "Medicine_ID", "Medicine_Name", "Company_Name", "Quantity", "Price"
+            }
+        ));
+
+        JButton btnCalculate = new JButton("Calculate");
+        btnCalculate.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double ppu = Double.parseDouble(textField_1.getText());
+                    int quantity = Integer.parseInt(textField_2.getText());
+                    double totalPrice = ppu * quantity;
+                    textField_3.setText(String.valueOf(totalPrice));
+                    textField_4.setText(String.valueOf(totalPrice)); // Update the total price field
+                } catch (NumberFormatException e2) {
+                    JOptionPane.showMessageDialog(null, "Please enter valid numbers for price and quantity.");
+                }
+            }
+        });
+        btnCalculate.setBounds(191, 249, 124, 38);
+        btnCalculate.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnCalculate);
+
+        JButton btnBill = new JButton("Bill");
+        btnBill.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                StringBuilder bill = new StringBuilder();
+                bill.append("=============================================\n");
+                bill.append("                                Medicine Bill\n");
+                bill.append("=============================================\n\n");
+                bill.append("Date:"+output+"\n");
+                bill.append(String.format("%-20s %-20s %-10s %-10s\n", "Medicine_Name", "Price_per_Unit", "Quantity", "Total"));
+
+                double totalAmount = 0.0;
+
+                for (String[] medicine : selectedMedicines) {
+                    String medicineName = medicine[1];
+                    String pricePerUnit = medicine[4];
+                    String quantity = medicine[5];
+                    String total = String.valueOf(Double.parseDouble(pricePerUnit) * Double.parseDouble(quantity));
+
+                    bill.append(String.format("%-18s   %-28s %-15s %-15s\n", medicineName, pricePerUnit, quantity, total));
+                    totalAmount += Double.parseDouble(total);
+                    // Decrease the medicine quantity in the database
+                    updateMedicineQuantity(medicineName, Integer.parseInt(quantity));
+                }
+
+                bill.append("\nTotal Amount: " + totalAmount + "\n");
+
+                JTextArea textArea = new JTextArea(bill.toString());
+                textArea.setFont(new Font("Arial", Font.PLAIN, 14));
+                textArea.setEditable(false);
+                JScrollPane scrollPane = new JScrollPane(textArea);
+                scrollPane.setPreferredSize(new Dimension(400, 300));
+                JOptionPane.showMessageDialog(null, scrollPane, "Medicine Bill", JOptionPane.PLAIN_MESSAGE);
+                try {
+                    textArea.print();
+                } catch (PrinterException e3) {
+                    e3.printStackTrace();
+                }
+            }
+        });
+        btnBill.setBounds(623, 666, 102, 30);
+        btnBill.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnBill);
+
+        JButton btnBack = new JButton("Back");
+        btnBack.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminDashboard newframe = new AdminDashboard();
+                newframe.setVisible(true);
+                dispose(); // Dispose the current frame directly
+            }
+        });
+        btnBack.setBounds(126, 666, 102, 30);
+        btnBack.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnBack);
+
+        JButton btnShow = new JButton("Show");
+        btnShow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                showAllMedicines();
+            }
+        });
+        btnShow.setBounds(405, 666, 102, 30);
+        btnShow.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnShow);
+
+        JLabel lblTotal = new JLabel("Paying amount");
+        lblTotal.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblTotal.setBackground(UIManager.getColor("Button.background"));
+        lblTotal.setBounds(10, 294, 141, 30);
+        contentPane.add(lblTotal);
+
+        JLabel lblPayingAmount = new JLabel("Given amount");
+        lblPayingAmount.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblPayingAmount.setBackground(UIManager.getColor("Button.background"));
+        lblPayingAmount.setBounds(10, 351, 141, 30);
+        contentPane.add(lblPayingAmount);
+
+        JLabel lblBalance = new JLabel("Return");
+        lblBalance.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblBalance.setBackground(UIManager.getColor("Button.background"));
+        lblBalance.setBounds(10, 402, 141, 30);
+        contentPane.add(lblBalance);
+
+        textField_4 = new JTextField();
+        textField_4.setColumns(10);
+        textField_4.setBounds(161, 297, 199, 30);
+        contentPane.add(textField_4);
+
+        textField_5 = new JTextField();
+        textField_5.setColumns(10);
+        textField_5.setBounds(161, 354, 199, 30);
+        contentPane.add(textField_5);
+
+        textField_6 = new JTextField();
+        textField_6.setColumns(10);
+        textField_6.setBounds(161, 405, 199, 30);
+        contentPane.add(textField_6);
+
+        textField_2 = new JTextField();
+        textField_2.setColumns(10);
+        textField_2.setBounds(161, 150, 199, 30);
+        contentPane.add(textField_2);
+
+        // Button to navigate to the scanner page
+        JButton btnScanner = new JButton("Scanner");
+        btnScanner.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                scanner scannerPage = new scanner();
+                scannerPage.setVisible(true);
+                dispose(); // Dispose the current frame
+            }
+        });
+        btnScanner.setBounds(791, 660, 102, 30);
+        btnScanner.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnScanner);
+
+        JButton btnCalculated = new JButton("Calculated");
+        btnCalculated.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                try {
+                    double total = Double.parseDouble(textField_4.getText());
+                    double givenAmount = Double.parseDouble(textField_5.getText());
+                    double returnAmount = givenAmount - total;
+                    textField_6.setText(String.valueOf(returnAmount));
+                } catch (NumberFormatException ex) {
+                    JOptionPane.showMessageDialog(null, "Please enter valid numbers.");
+                }
+            }
+        });
+        btnCalculated.setFont(new Font("Tahoma", Font.BOLD, 15));
+        btnCalculated.setBounds(201, 445, 124, 38);
+        contentPane.add(btnCalculated);
+
+        // Button to add medicine to the list
+        JButton btnAddToList = new JButton("Add to List");
+        btnAddToList.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                DefaultTableModel model = (DefaultTableModel) table.getModel();
+                int selectedRow = table.getSelectedRow();
+                if (selectedRow != -1) {
+                    String[] medicine = new String[6];
+                    for (int i = 0; i < 5; i++) {
+                        medicine[i] = (String) model.getValueAt(selectedRow, i);
+                    }
+                    medicine[5] = textField_2.getText(); // Quantity
+                    selectedMedicines.add(medicine);
+
+                    // Update the cart table
+                    DefaultTableModel cartModel = (DefaultTableModel) table_1.getModel();
+                    cartModel.addRow(medicine);
+                } else {
+                    JOptionPane.showMessageDialog(null, "Please select a medicine from the table.");
+                }
+            }
+        });
+        btnAddToList.setFont(new Font("Tahoma", Font.BOLD, 15));
+        btnAddToList.setBounds(540, 135, 141, 30);
+        contentPane.add(btnAddToList);
+
+        JScrollPane scrollPane_1 = new JScrollPane();
+        scrollPane_1.setBounds(440, 175, 535, 231);
+       
+        contentPane.add(scrollPane_1);
+
+        table_1 = new JTable();
+        scrollPane_1.setViewportView(table_1);
+        table_1.setModel(new DefaultTableModel(
+            new Object[][] {},
+            new String[] {
+                "Medicine_ID", "Medicine_Name", "Company_Name", "Quantity", "Price"
+            }
+        ));
+        
+        JLabel lblSellMedicine = new JLabel("SELL MEDICINE");
+        lblSellMedicine.setFont(new Font("Tahoma", Font.BOLD, 15));
+        lblSellMedicine.setBackground(UIManager.getColor("Button.background"));
+        lblSellMedicine.setBounds(440, 0, 141, 30);
+        contentPane.add(lblSellMedicine);
+        table_1.getColumnModel().getColumn(1).setPreferredWidth(87);
+        table_1.getColumnModel().getColumn(2).setPreferredWidth(89);
+    }
+
+    // Method to search medicines by partial match
+    private void searchMedicines(String searchQuery) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String query = "SELECT * FROM medicine2 WHERE Medicine_Name LIKE ?";
+            PreparedStatement pts = con.prepareStatement(query);
+            pts.setString(1, "%" + textField.getText() + "%");
+            ResultSet rs = pts.executeQuery();
+            DefaultTableModel dt = (DefaultTableModel) table.getModel();
+            dt.setRowCount(0);
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("Medicine_ID"),
+                    rs.getString("Medicine_Name"),
+                    rs.getString("Company_Name"),
+                    rs.getString("Quantity"),
+                    rs.getString("Price_per_Unit")
+                };
+                if (Integer.parseInt(rs.getString("Quantity")) == 0) {
+                    JOptionPane.showMessageDialog(null, "Medicine not available in shop.");
+                    return;
+                }
+                dt.addRow(row);
+            }
+            if (dt.getRowCount() == 0) {
+                JOptionPane.showMessageDialog(null, "Medicine not available in shop.");
+            } else {
+                textField_1.setText(String.valueOf(dt.getValueAt(0, 4))); // Show the price of the first medicine
+            }
+            con.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+    }
+
+    // Method to show all medicines
+    private void showAllMedicines() {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String sql = "SELECT * FROM medicine2";
+            PreparedStatement pts = con.prepareStatement(sql);
+            ResultSet rs = pts.executeQuery();
+            DefaultTableModel dt = (DefaultTableModel) table.getModel();
+            dt.setRowCount(0);
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("Medicine_ID"),
+                    rs.getString("Medicine_Name"),
+                    rs.getString("Company_Name"),
+                    rs.getString("Quantity"),
+                    rs.getString("Price_per_Unit")
+                };
+                dt.addRow(row);
+            }
+            con.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+    }
+    
+    // Method to update medicine quantity after selling
+    private void updateMedicineQuantity(String medicineName, int quantitySold) {
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            Connection con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String query = "UPDATE medicine2 SET Quantity = Quantity - ? WHERE Medicine_Name = ?";
+            PreparedStatement pts = con.prepareStatement(query);
+            pts.setInt(1, quantitySold);
+            pts.setString(2, medicineName);
+            pts.executeUpdate();
+            con.close();
+        } catch (Exception ex) {
+            ex.printStackTrace();
+            JOptionPane.showMessageDialog(null, "Error: " + ex.getMessage());
+        }
+    }
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JButton;
+import javax.swing.JTextArea;
+import javax.swing.JScrollPane;
+import java.awt.event.ActionListener;
+import java.awt.event.ActionEvent;
+import java.awt.Font;
+import java.awt.Dimension;
+import javax.swing.JLabel;
+import javax.swing.ImageIcon;
+import javax.swing.JTable;
+
+public class scanner extends JFrame {
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    scanner frame = new scanner();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    public scanner() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 713, 549);
+        contentPane = new JPanel();
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+
+        // Button to go back to the main frame
+        JButton btnBack = new JButton("Back");
+        btnBack.setBounds(26, 284, 102, 30);
+        btnBack.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                sellmedicine mainFrame = new sellmedicine();
+                mainFrame.setVisible(true);
+                dispose(); // Dispose the current frame
+            }
+        });
+        contentPane.setLayout(null);
+        btnBack.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(btnBack);
+        
+        JLabel lblNewLabel = new JLabel("");
+        lblNewLabel.setBounds(176, 33, 460, 435);
+        lblNewLabel.setIcon(new ImageIcon("C:\\Users\\Rajkapoor\\OneDrive\\Documents\\scc.jpg"));
+        contentPane.add(lblNewLabel);
+        
+        JButton btnDone = new JButton("Done");
+        btnDone.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		sellmedicine mainFrame = new sellmedicine();
+                mainFrame.setVisible(true);
+                dispose(); // Dispose the current frame
+        	}
+        });
+        btnDone.setFont(new Font("Tahoma", Font.BOLD, 15));
+        btnDone.setBounds(37, 425, 102, 30);
+        contentPane.add(btnDone);
+    }
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.awt.event.ActionEvent;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+
+public class bill extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTextField billField;
+    private JTextField dateField;
+    private JTextField totalField;
+    private JTextField generatedByField;
+    private JTextField customerNameField;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    bill frame = new bill();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public bill() {
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 711, 512);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel billLabel = new JLabel("Bill_Id:");
+        billLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        billLabel.setBounds(26, 142, 104, 31);
+        contentPane.add(billLabel);
+
+        JLabel dateLabel = new JLabel("Date:");
+        dateLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        dateLabel.setBounds(50, 208, 104, 31);
+        contentPane.add(dateLabel);
+
+        JLabel totalLabel = new JLabel("Total_Paid:");
+        totalLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        totalLabel.setBounds(46, 293, 119, 31);
+        contentPane.add(totalLabel);
+
+        JLabel byLabel = new JLabel("Generated_By:");
+        byLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        byLabel.setBounds(26, 369, 151, 31);
+        contentPane.add(byLabel);
+
+        billField = new JTextField();
+        billField.setBounds(251, 142, 242, 38);
+        contentPane.add(billField);
+        billField.setColumns(10);
+
+        dateField = new JTextField();
+        dateField.setColumns(10);
+        dateField.setBounds(251, 209, 242, 38);
+        contentPane.add(dateField);
+
+        totalField = new JTextField();
+        totalField.setColumns(10);
+        totalField.setBounds(251, 294, 242, 38);
+        contentPane.add(totalField);
+
+        generatedByField = new JTextField();
+        generatedByField.setColumns(10);
+        generatedByField.setBounds(251, 370, 242, 38);
+        contentPane.add(generatedByField);
+
+        JButton btnSave = new JButton("Save");
+        btnSave.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                saveBillData();
+            }
+        });
+        btnSave.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnSave.setBounds(504, 423, 119, 31);
+        contentPane.add(btnSave);
+
+        JButton btnBack = new JButton("Back");
+        btnBack.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminDashboard newFrame = new AdminDashboard();
+                newFrame.setVisible(true);
+                SwingUtilities.windowForComponent(btnBack).dispose();
+            }
+        });
+        btnBack.setFont(new Font("Tahoma", Font.BOLD, 20));
+        btnBack.setBounds(278, 423, 119, 31);
+        contentPane.add(btnBack);
+
+        customerNameField = new JTextField();
+        customerNameField.setColumns(10);
+        customerNameField.setBounds(251, 58, 242, 38);
+        contentPane.add(customerNameField);
+
+        JLabel nameLabel = new JLabel("Customer_Name:");
+        nameLabel.setFont(new Font("Tahoma", Font.BOLD, 20));
+        nameLabel.setBounds(35, 72, 194, 31);
+        contentPane.add(nameLabel);
+        
+        JLabel lblAddBill = new JLabel("ADD BILL");
+        lblAddBill.setFont(new Font("Tahoma", Font.BOLD, 20));
+        lblAddBill.setBounds(237, 10, 194, 31);
+        contentPane.add(lblAddBill);
+    }
+
+    private void saveBillData() {
+        String customerName = customerNameField.getText();
+        String billId = billField.getText();
+        String date = dateField.getText();
+        String totalPaid = totalField.getText();
+        String generatedBy = generatedByField.getText();
+
+        if (customerName.isEmpty() || billId.isEmpty() || date.isEmpty() || totalPaid.isEmpty() || generatedBy.isEmpty()) {
+            JOptionPane.showMessageDialog(null, "All fields must be filled out", "Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String sql = "INSERT INTO bills (name, billid, date, total, generatedby) VALUES (?, ?, ?, ?, ?)";
+            pstmt = con.prepareStatement(sql);
+            pstmt.setString(1, customerName);
+            pstmt.setString(2, billId);
+            pstmt.setString(3, date);
+            pstmt.setString(4, totalPaid);
+            pstmt.setString(5, generatedBy);
+            pstmt.executeUpdate();
+            JOptionPane.showMessageDialog(null, "Bill has been registered");
+        } catch (Exception ex) {
+            JOptionPane.showMessageDialog(null, "Error: Bill has not been registered", "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        } finally {
+            try {
+                if (pstmt != null) pstmt.close();
+                if (con != null) con.close();
+            } catch (Exception ex) {
+                ex.printStackTrace();
+            }
+        }
+    }
+}
+import java.awt.EventQueue;
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.border.EmptyBorder;
+import javax.swing.JLabel;
+import javax.swing.JOptionPane;
+import java.awt.Font;
+import javax.swing.JSeparator;
+import javax.swing.JTable;
+import javax.swing.SwingUtilities;
+import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
+import javax.swing.JButton;
+import java.awt.event.ActionListener;
+import java.sql.Connection;
+import java.sql.DriverManager;
+import java.sql.PreparedStatement;
+import java.sql.ResultSet;
+import java.sql.ResultSetMetaData;
+import java.sql.Statement;
+import java.awt.event.ActionEvent;
+import javax.swing.JTextField;
+import javax.swing.ImageIcon;
+import java.awt.Color;
+
+public class viewbill extends JFrame {
+
+    private static final long serialVersionUID = 1L;
+    private JPanel contentPane;
+    private JTable table;
+    private JTextField textField;
+    private JTextField textField_1;
+
+    /**
+     * Launch the application.
+     */
+    public static void main(String[] args) {
+        EventQueue.invokeLater(new Runnable() {
+            public void run() {
+                try {
+                    viewbill frame = new viewbill();
+                    frame.setVisible(true);
+                } catch (Exception e) {
+                    e.printStackTrace();
+                }
+            }
+        });
+    }
+
+    /**
+     * Create the frame.
+     */
+    public viewbill() {
+        setTitle("View Bill");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        setBounds(100, 100, 962, 761);
+        contentPane = new JPanel();
+        contentPane.setBackground(new Color(255, 128, 0));
+        contentPane.setBorder(new EmptyBorder(5, 5, 5, 5));
+        setContentPane(contentPane);
+        contentPane.setLayout(null);
+
+        JLabel lblNewLabel = new JLabel("View Bill");
+        lblNewLabel.setBounds(400, 41, 191, 37);
+        lblNewLabel.setFont(new Font("Tahoma", Font.BOLD, 30));
+        contentPane.add(lblNewLabel);
+
+        JSeparator separator = new JSeparator();
+        separator.setBounds(10, 83, 953, 12);
+        contentPane.add(separator);
+
+        JButton backButton = new JButton("Back");
+        backButton.setBounds(46, 593, 149, 37);
+        backButton.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                AdminDashboard newFrame = new AdminDashboard();
+                newFrame.setVisible(true);
+                SwingUtilities.windowForComponent(backButton).dispose();
+            }
+        });
+        backButton.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(backButton);
+
+        JButton btnShow = new JButton("Show");
+        btnShow.setBounds(295, 593, 149, 37);
+        btnShow.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                showBillData();
+            }
+        });
+        btnShow.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnShow);
+
+        JButton btnClose = new JButton("Close");
+        btnClose.setBounds(727, 22, 149, 37);
+        btnClose.addActionListener(new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                setVisible(false);
+            }
+        });
+        btnClose.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnClose);
+
+        JScrollPane scrollPane = new JScrollPane();
+        scrollPane.setBounds(27, 201, 849, 369);
+        contentPane.add(scrollPane);
+
+        table = new JTable();
+        scrollPane.setViewportView(table);
+        table.setModel(new DefaultTableModel(
+            new Object[][] {},
+            new String[] {
+                "Customer Name", "Bill Id", "Date", "Total Paid", "Generated By"
+            }
+        ));
+        
+        JButton btnShow_1 = new JButton("Delete");
+        btnShow_1.setBounds(520, 593, 149, 37);
+        btnShow_1.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try {
+    				Class.forName("com.mysql.cj.jdbc.Driver");
+    	            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+    	            Statement st = conn.createStatement();
+    	            String text = textField.getText();
+    	            String sql ="DELETE FROM bills WHERE billid='"+text+"'";
+    	            st.executeUpdate(sql);
+    	            JOptionPane.showMessageDialog(null,"Deleted from bills","Delete Success",3);
+    			}catch(Exception s) {
+    				JOptionPane.showMessageDialog(null,s,"Delete Falied",3);
+    			}
+    			}
+        }
+    );
+        btnShow_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnShow_1);
+        
+        JLabel bill = new JLabel("Bill_id");
+        bill.setBounds(46, 105, 112, 30);
+        bill.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(bill);
+        
+        textField = new JTextField();
+        textField.setBounds(121, 104, 142, 37);
+        contentPane.add(textField);
+        textField.setColumns(10);
+        
+        JButton btnShow_1_1 = new JButton("search");
+        btnShow_1_1.setBounds(295, 105, 149, 37);
+        btnShow_1_1.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+        		try{
+
+		            table.setModel(new DefaultTableModel());
+
+		            Class.forName("com.mysql.cj.jdbc.Driver");
+		            Connection conn = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+		            Statement st = conn.createStatement();
+		            String v = textField.getText();
+		            String sql ="Select * from bills where billid='"+v+"'";
+		            ResultSet rs = st.executeQuery(sql);
+		            ResultSetMetaData rsmd = (ResultSetMetaData) rs.getMetaData();
+		            DefaultTableModel model= (DefaultTableModel) table.getModel();
+
+		            int cols=rsmd.getColumnCount();
+		            String[] colName= new String[cols];
+
+		            for (int i=0;i<cols;i++)
+		            {
+		                colName[i] = rsmd.getColumnName(i+1).toUpperCase();
+		            }
+		            model.setColumnIdentifiers(colName);
+
+		            String n,f;
+		            while(rs.next())
+		            {
+		                n = rs.getString(1);
+		                f = rs.getString(2);
+		                String[] rows= {n,f,rs.getString(3),rs.getString(4),rs.getString(5)};
+		                model.addRow(rows);
+		            }
+		            st.close();
+		            conn.close();
+
+		        }catch (Exception E){
+		            JOptionPane.showMessageDialog(null,E,"Refresh Failed",3);
+		        }
+			}
+        });
+        btnShow_1_1.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnShow_1_1);
+        
+        JLabel lblNewLabel_1_1 = new JLabel("Date");
+        lblNewLabel_1_1.setBounds(46, 161, 112, 30);
+        lblNewLabel_1_1.setFont(new Font("Tahoma", Font.BOLD, 15));
+        contentPane.add(lblNewLabel_1_1);
+        
+        textField_1 = new JTextField();
+        textField_1.setBounds(121, 154, 142, 37);
+        textField_1.setColumns(10);
+        contentPane.add(textField_1);
+        
+        JButton btnShow_1_2 = new JButton("Update");
+        btnShow_1_2.setBounds(727, 593, 149, 37);
+        btnShow_1_2.addActionListener(new ActionListener() {
+        	public void actionPerformed(ActionEvent e) {
+    				String i=textField.getText();
+    				String d=textField_1.getText();
+
+    				
+    				try {
+    					Class.forName("com.mysql.cj.jdbc.Driver");
+            			Connection con1 = (Connection)DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine","root","raj@2004");
+    				   
+    				   
+    					PreparedStatement pst = con1.prepareStatement("update bills set Date=? where billid='"+i+"'");
+    					
+    				   
+    				    //pst.setString(1, i);
+    				    pst.setString(1, d);
+    				    
+    				   
+    				    
+    				    int rowsAffected = pst.executeUpdate();
+    				    if (rowsAffected > 0) {
+    				        JOptionPane.showMessageDialog(null, "Successfully updated");
+    				        setVisible(false);
+    				        new Dashboard().setVisible(true);
+    				    } else {
+    				        JOptionPane.showMessageDialog(null, "Failed to update");
+    				    }
+    				    
+    				    pst.close();
+    				    con1.close();
+    				} catch (Exception e1) {
+    				    e1.printStackTrace();
+    				    // Handle any SQL errors
+    				}
+        	}
+        });
+        btnShow_1_2.setFont(new Font("Tahoma", Font.BOLD, 20));
+        contentPane.add(btnShow_1_2);
+        table.getColumnModel().getColumn(0).setPreferredWidth(100);
+        table.getColumnModel().getColumn(1).setPreferredWidth(100);
+        table.getColumnModel().getColumn(2).setPreferredWidth(100);
+        table.getColumnModel().getColumn(3).setPreferredWidth(100);
+        table.getColumnModel().getColumn(4).setPreferredWidth(100);
+    }
+
+    private void showBillData() {
+        Connection con = null;
+        PreparedStatement pstmt = null;
+        ResultSet rs = null;
+        try {
+            Class.forName("com.mysql.cj.jdbc.Driver");
+            con = DriverManager.getConnection("jdbc:mysql://localhost:3307/medicine", "root", "raj@2004");
+            String sql = "SELECT * FROM bills";
+            pstmt = con.prepareStatement(sql);
+            rs = pstmt.executeQuery();
+            DefaultTableModel dt = (DefaultTableModel) table.getModel();
+            dt.setRowCount(0);
+
+            while (rs.next()) {
+                Object[] row = {
+                    rs.getString("name"),
+                    rs.getString("billid"),
+                    rs.getString("date"),
+                    rs.getString("total"),
+                    rs.getString("generatedby")
+                };
+                dt.addRow(row);
+            }
+        } catch (Exception e) {
+            JOptionPane.showMessageDialog(null, "Error fetching bill data.");
+            e.printStackTrace();
+        } finally {
+            try {
+                if (rs != null) rs.close();
+                if (pstmt != null) pstmt.close();
+                if (con != null) con.close();
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
